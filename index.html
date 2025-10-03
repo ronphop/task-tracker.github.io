@@ -164,7 +164,7 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-blue-dark">ระบบติดตามงานบุคลากรการศึกษาพยาบาล</h1>
-                        <p class="text-blue-600 text-sm">เวอร์ชั่น 5.0 - Nursing Education Task Management</p>
+                        <p class="text-blue-600 text-sm">Nursing Education Task Management</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -548,7 +548,7 @@
             currentView = currentView === 'list' ? 'kanban' : 'list';
             document.getElementById('listView').classList.toggle('hidden', currentView !== 'list');
             document.getElementById('kanbanView').classList.toggle('hidden', currentView !== 'kanban');
-            document.getElementById('viewText').textContent = currentView === 'list' ? 'Kanban' : 'List';
+            document.getElementById('viewText').textContent = currentView === 'list' ? 'Task List' : 'List';
             document.getElementById('viewIcon').textContent = currentView === 'list' ? '📋' : '🧱';
         }
         
