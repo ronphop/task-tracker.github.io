@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบติดตามงานบุคลากรการศึกษาพยาบาล v5.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 50%, #ffffff 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .priority-high { 
+            border-left: 5px solid #ef4444; 
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        }
+        .priority-medium { 
+            border-left: 5px solid #f59e0b; 
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        }
+        .priority-low { 
+            border-left: 5px solid #10b981; 
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }
+        
+        .status-pending { 
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border: 2px solid #cbd5e1;
+        }
+        .status-progress { 
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border: 2px solid #60a5fa;
+        }
+        .status-completed { 
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border: 2px solid #34d399;
+        }
+        
+        .floating-action {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            animation: progress-flow 2s ease-in-out infinite;
+        }
+        
+        @keyframes progress-flow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .notification-enter {
+            animation: notificationEnter 0.5s ease-out;
+        }
+        
+        @keyframes notificationEnter {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .dark-mode {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+        }
+        
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .kanban-column {
+            min-height: 500px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        
+        .search-highlight {
+            background: yellow;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .text-blue-dark {
+            color: #1e40af;
+        }
+
+        .text-blue-medium {
+            color: #2563eb;
+        }
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen font-sans">
+    <header class="glass-effect border-b border-blue-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
+                        <span class="text-white font-bold text-xl">🏥</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-blue-dark">ระบบติดตามงานบุคลากรการศึกษาพยาบาล</h1>
+                        <p class="text-blue-600 text-sm">เวอร์ชั่น 5.0 - Nursing Education Task Management</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleDarkMode()" class="glass-effect p-2 rounded-lg text-blue-dark hover:bg-blue-100 transition-all">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+                    <button onclick="toggleView()" class="glass-effect px-4 py-2 rounded-lg text-blue-dark hover:bg-blue-100 transition-all">
+                        <span id="viewIcon">📋</span> <span id="viewText">Kanban</span>
+                    </button>
+                    <div class="text-sm text-blue-600">
+                        <span id="currentTime" class="font-medium"></span>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="text-blue-600 text-sm">👩‍⚕️</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+            <div class="glass-effect rounded-xl p-6 card-hover border border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-blue-600">งานทั้งหมด</p>
+                        <p class="text-3xl font-bold text-blue-dark" id="totalTasks">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="text-blue-600 text-xl">📋</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-effect rounded-xl p-6 card-hover border border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-blue-600">รอดำเนินการ</p>
+                        <p class="text-3xl font-bold text-yellow-600" id="pendingTasks">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center pulse-animation">
+                        <span class="text-yellow-600 text-xl">⏳</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-effect rounded-xl p-6 card-hover border border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-blue-600">กำลังดำเนินการ</p>
+                        <p class="text-3xl font-bold text-blue-600" id="progressTasks">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="text-blue-600 text-xl">🔄</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-effect rounded-xl p-6 card-hover border border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-blue-600">เสร็จสิ้น</p>
+                        <p class="text-3xl font-bold text-green-600" id="completedTasks">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <span class="text-green-600 text-xl">✅</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-effect rounded-xl p-6 card-hover border border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-blue-600">ประสิทธิภาพ</p>
+                        <p class="text-3xl font-bold text-purple-600" id="efficiency">0%</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <span class="text-purple-600 text-xl">📊</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-xl p-4 mb-6 border border-blue-200">
+            <div class="flex flex-wrap gap-4 items-center">
+                <div class="flex-1 min-w-64">
+                    <input type="text" id="searchInput" placeholder="🔍 ค้นหางาน..." 
+                           class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark placeholder-blue-400 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
+                </div>
+                <div class="flex gap-2">
+                    <select id="priorityFilter" class="px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark focus:ring-2 focus:ring-blue-400">
+                        <option value="all">ทุกระดับความสำคัญ</option>
+                        <option value="high">สูง</option>
+                        <option value="medium">ปานกลาง</option>
+                        <option value="low">ต่ำ</option>
+                    </select>
+                    <select id="statusFilter" class="px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark focus:ring-2 focus:ring-blue-400">
+                        <option value="all">ทุกสถานะ</option>
+                        <option value="pending">รอดำเนินการ</option>
+                        <option value="progress">กำลังทำ</option>
+                        <option value="completed">เสร็จสิ้น</option>
+                    </select>
+                    <button onclick="clearFilters()" class="px-4 py-2 bg-red-100 border border-red-300 rounded-lg text-red-600 hover:bg-red-200 transition-all">
+                        ล้างตัวกรอง
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="listView" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <div class="glass-effect rounded-xl p-6 mb-6 border border-blue-200">
+                    <h2 class="text-xl font-bold text-blue-dark mb-4 flex items-center">
+                        <span class="mr-2">➕</span> เพิ่มงานใหม่
+                    </h2>
+                    <form id="taskForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-blue-600 mb-2">ชื่องาน</label>
+                                <input type="text" id="taskTitle" required 
+                                       class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark placeholder-blue-400 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-blue-600 mb-2">ชื่อผู้ปฏิบัติงาน</label>
+                                <input type="text" id="patientName" required 
+                                       class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark placeholder-blue-400 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-blue-600 mb-2">ความสำคัญ</label>
+                                <select id="priority" class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
+                                    <option value="high">🔴 สูง</option>
+                                    <option value="medium" selected>🟡 ปานกลาง</option>
+                                    <option value="low">🟢 ต่ำ</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-blue-600 mb-2">หมวดหมู่</label>
+                                <select id="category" class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
+                                    <option value="teaching">การสอน</option>
+                                    <option value="clinical">งานคลินิก</option>
+                                    <option value="research">วิจัย</option>
+                                    <option value="meeting">ประชุม</option>
+                                    <option value="training">อบรม</option>
+                                    <option value="evaluation">ประเมิน</option>
+                                    <option value="general">ทั่วไป</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-blue-600 mb-2">กำหนดเวลา</label>
+                                <input type="datetime-local" id="dueDate" required 
+                                       class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-blue-600 mb-2">รายละเอียด</label>
+                            <textarea id="taskDescription" rows="3" 
+                                      class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark placeholder-blue-400 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-blue-600 mb-2">แท็ก (คั่นด้วยเครื่องหมายจุลภาค)</label>
+                                <input type="text" id="taskTags" placeholder="เช่น: เร่งด่วน, สำคัญ, นักศึกษา" 
+                                       class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark placeholder-blue-400 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-blue-600 mb-2">เปอร์เซ็นต์ความคืบหน้า</label>
+                                <input type="range" id="progressSlider" min="0" max="100" value="0" 
+                                       class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-blue-500 mt-1">
+                                    <span>0%</span>
+                                    <span id="progressValue">0%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 px-6 rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 font-medium shadow-lg">
+                            ✨ เพิ่มงาน
+                        </button>
+                    </form>
+                </div>
+
+                <div class="glass-effect rounded-xl p-6 border border-blue-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-blue-dark flex items-center">
+                            <span class="mr-2">📝</span> รายการงาน
+                        </h2>
+                        <div class="flex gap-2">
+                            <button onclick="sortTasks('dueDate')" class="px-3 py-1 bg-blue-100 rounded-lg text-blue-600 hover:bg-blue-200 transition-all text-sm">
+                                📅 วันที่
+                            </button>
+                            <button onclick="sortTasks('priority')" class="px-3 py-1 bg-blue-100 rounded-lg text-blue-600 hover:bg-blue-200 transition-all text-sm">
+                                ⚡ ความสำคัญ
+                            </button>
+                            <button onclick="sortTasks('progress')" class="px-3 py-1 bg-blue-100 rounded-lg text-blue-600 hover:bg-blue-200 transition-all text-sm">
+                                📊 ความคืบหน้า
+                            </button>
+                        </div>
+                    </div>
+                    <div id="taskList" class="space-y-4">
+                        </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="glass-effect rounded-xl p-6 mb-6 border border-blue-200">
+                    <h2 class="text-xl font-bold text-blue-dark mb-4 flex items-center">
+                        <span class="mr-2">📈</span> สถิติงาน
+                    </h2>
+                    <div class="h-64">
+                        <canvas id="taskChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-effect rounded-xl p-6 mb-6 border border-blue-200">
+                    <h2 class="text-xl font-bold text-blue-dark mb-4 flex items-center">
+                        <span class="mr-2">📊</span> ภาพรวมความคืบหน้า
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm text-blue-600 mb-1">
+                                <span>ความคืบหน้ารวม</span>
+                                <span id="overallProgress">0%</span>
+                            </div>
+                            <div class="w-full bg-blue-200 rounded-full h-2">
+                                <div id="overallProgressBar" class="progress-bar h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div id="categoryProgress">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="glass-effect rounded-xl p-6 border border-blue-200">
+                    <h2 class="text-xl font-bold text-blue-dark mb-4 flex items-center">
+                        <span class="mr-2">⚡</span> การดำเนินการด่วน
+                    </h2>
+                    <div class="space-y-3">
+                        <button onclick="showUrgentTasks()" 
+                                class="w-full bg-red-50 hover:bg-red-100 text-red-600 py-3 px-4 rounded-lg transition-all text-left border border-red-200">
+                            <div class="flex items-center justify-between">
+                                <span>🚨 งานเร่งด่วน</span>
+                                <span class="bg-red-200 text-red-700 px-2 py-1 rounded-full text-xs" id="urgentCount">0</span>
+                            </div>
+                        </button>
+                        <button onclick="showOverdueTasks()" 
+                                class="w-full bg-orange-50 hover:bg-orange-100 text-orange-600 py-3 px-4 rounded-lg transition-all text-left border border-orange-200">
+                            <div class="flex items-center justify-between">
+                                <span>⏰ งานเกินกำหนด</span>
+                                <span class="bg-orange-200 text-orange-700 px-2 py-1 rounded-full text-xs" id="overdueCount">0</span>
+                            </div>
+                        </button>
+                        <button onclick="showTodayTasks()" 
+                                class="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 py-3 px-4 rounded-lg transition-all text-left border border-blue-200">
+                            <div class="flex items-center justify-between">
+                                <span>📅 งานวันนี้</span>
+                                <span class="bg-blue-200 text-blue-700 px-2 py-1 rounded-full text-xs" id="todayCount">0</span>
+                            </div>
+                        </button>
+                        <button onclick="showCompletedTasks()" 
+                                class="w-full bg-green-50 hover:bg-green-100 text-green-600 py-3 px-4 rounded-lg transition-all text-left border border-green-200">
+                            <div class="flex items-center justify-between">
+                                <span>✅ งานที่เสร็จแล้ว</span>
+                                <span class="bg-green-200 text-green-700 px-2 py-1 rounded-full text-xs" id="completedTasksCount">0</span>
+                            </div>
+                        </button>
+                        <button onclick="showThisWeekTasks()" 
+                                class="w-full bg-purple-50 hover:bg-purple-100 text-purple-600 py-3 px-4 rounded-lg transition-all text-left border border-purple-200">
+                            <div class="flex items-center justify-between">
+                                <span>📅 งานสัปดาห์นี้</span>
+                                <span class="bg-purple-200 text-purple-700 px-2 py-1 rounded-full text-xs" id="weekTasksCount">0</span>
+                            </div>
+                        </button>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="kanbanView" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="kanban-column">
+                    <h3 class="text-lg font-bold text-blue-dark mb-4 flex items-center">
+                        <span class="w-3 h-3 bg-yellow-400 rounded-full mr-2"></span>
+                        รอดำเนินการ (<span id="kanban-pending-count">0</span>)
+                    </h3>
+                    <div id="kanban-pending" class="space-y-3 min-h-96">
+                        </div>
+                </div>
+                <div class="kanban-column">
+                    <h3 class="text-lg font-bold text-blue-dark mb-4 flex items-center">
+                        <span class="w-3 h-3 bg-blue-400 rounded-full mr-2"></span>
+                        กำลังดำเนินการ (<span id="kanban-progress-count">0</span>)
+                    </h3>
+                    <div id="kanban-progress" class="space-y-3 min-h-96">
+                        </div>
+                </div>
+                <div class="kanban-column">
+                    <h3 class="text-lg font-bold text-blue-dark mb-4 flex items-center">
+                        <span class="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+                        เสร็จสิ้น (<span id="kanban-completed-count">0</span>)
+                    </h3>
+                    <div id="kanban-completed" class="space-y-3 min-h-96">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="floating-action">
+        <button onclick="openQuickAddModal()" 
+                class="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all flex items-center justify-center text-white text-xl">
+            ⚡
+        </button>
+    </div>
+
+    <div id="quickAddModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+        <div class="glass-effect rounded-xl p-6 max-w-md w-full border border-blue-200 fade-in">
+            <h3 class="text-lg font-bold text-blue-dark mb-4">⚡ เพิ่มงานด่วน</h3>
+            <form id="quickAddForm" class="space-y-4">
+                <input type="text" id="quickTaskTitle" placeholder="ชื่องาน..." required
+                       class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark placeholder-blue-400 focus:ring-2 focus:ring-blue-400">
+                <input type="text" id="quickPatientName" placeholder="ผู้ปฏิบัติงาน..." required
+                       class="w-full px-4 py-2 bg-white/50 border border-blue-200 rounded-lg text-blue-dark placeholder-blue-400 focus:ring-2 focus:ring-blue-400">
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-all">
+                        เพิ่ม
+                    </button>
+                    <button type="button" onclick="closeQuickAddModal()" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-all">
+                        ยกเลิก
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let tasks = [];
+        let taskChart;
+        let currentView = 'list';
+        let isDarkMode = false;
+        let currentSort = 'dueDate';
+        let nextTaskId = 6; // Start ID after sample tasks
+
+        // --- Utility Functions ---
+
+        function formatThaiDateTime(date) {
+            if (!date) return '-';
+            const d = new Date(date);
+            const options = {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+                hour12: false
+            };
+            return d.toLocaleDateString('th-TH', options).replace(',', ' เวลา');
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateString = now.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('currentTime').textContent = `${dateString} ${timeString} น.`;
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            document.getElementById('themeIcon').textContent = isDarkMode ? '☀️' : '🌙';
+            // Update chart colors if necessary (simple version)
+            if (taskChart) {
+                taskChart.data.datasets[0].backgroundColor = isDarkMode 
+                    ? ['#34d399', '#60a5fa', '#fcd34d']
+                    : ['#10b981', '#3b82f6', '#f59e0b'];
+                taskChart.update();
+            }
+        }
+
+        function toggleView() {
+            currentView = currentView === 'list' ? 'kanban' : 'list';
+            document.getElementById('listView').classList.toggle('hidden', currentView !== 'list');
+            document.getElementById('kanbanView').classList.toggle('hidden', currentView !== 'kanban');
+            document.getElementById('viewText').textContent = currentView === 'list' ? 'Kanban' : 'List';
+            document.getElementById('viewIcon').textContent = currentView === 'list' ? '📋' : '🧱';
+        }
+        
+        function setDefaultDueDate() {
+            const now = new Date();
+            now.setHours(now.getHours() + 1); // Default to one hour from now
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('dueDate').value = `${year}-${month}-${day}T${hour}:${minute}`;
+        }
+
+        function updateProgressValue(event) {
+            document.getElementById('progressValue').textContent = event.target.value + '%';
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('priorityFilter').value = 'all';
+            document.getElementById('statusFilter').value = 'all';
+            updateAllDisplays();
+        }
+
+        // --- Data Persistence and Loading ---
+
+        function loadSampleTasks() {
+            const storedTasks = localStorage.getItem('nursingTasks');
+            if (storedTasks) {
+                tasks = JSON.parse(storedTasks).map(task => ({
+                    ...task,
+                    dueDate: new Date(task.dueDate),
+                    createdAt: new Date(task.createdAt)
+                }));
+                // Ensure nextTaskId is higher than any loaded ID
+                const maxId = tasks.reduce((max, task) => Math.max(max, task.id), 0);
+                nextTaskId = maxId >= nextTaskId ? maxId + 1 : nextTaskId;
+            } else {
+                tasks = [
+                    {
+                        id: 1,
+                        title: 'จัดทำแผนการสอนรายวิชาพยาบาลศัลยกรรม',
+                        patient: 'อ.ดร.สมหญิง ใจดี',
+                        description: 'จัดทำแผนการสอนรายวิชาพยาบาลศัลยกรรม สำหรับนักศึกษาชั้นปีที่ 3',
+                        priority: 'high',
+                        status: 'progress',
+                        category: 'teaching',
+                        progress: 75,
+                        tags: ['แผนการสอน', 'ศัลยกรรม', 'ปี3'],
+                        dueDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
+                        createdAt: new Date()
+                    },
+                    {
+                        id: 2,
+                        title: 'ประชุมคณะกรรมการหลักสูตร',
+                        patient: 'ผศ.ดร.สมชาย รักษ์ดี',
+                        description: 'ประชุมคณะกรรมการหลักสูตรพยาบาลศาสตรบัณฑิต เวลา 14:00 น.',
+                        priority: 'medium',
+                        status: 'pending',
+                        category: 'meeting',
+                        progress: 0,
+                        tags: ['ประชุม', 'หลักสูตร', 'คณะกรรมการ'],
+                        dueDate: new Date(Date.now() + 4 * 60 * 60 * 1000),
+                        createdAt: new Date()
+                    },
+                    {
+                        id: 3,
+                        title: 'ประเมินการปฏิบัติงานคลินิกนักศึกษา',
+                        patient: 'อ.สมศักดิ์ มีสุข',
+                        description: 'ประเมินการปฏิบัติงานคลินิกของนักศึกษาชั้นปีที่ 4 ณ หอผู้ป่วยอายุรกรรม',
+                        priority: 'medium',
+                        status: 'completed',
+                        category: 'clinical',
+                        progress: 100,
+                        tags: ['ประเมิน', 'คลินิก', 'ปี4'],
+                        dueDate: new Date(Date.now() - 1 * 60 * 60 * 1000), // Overdue/Completed
+                        createdAt: new Date()
+                    },
+                    {
+                        id: 4,
+                        title: 'อบรมเทคนิคการพยาบาลใหม่',
+                        patient: 'อ.สมปอง เก่งมาก',
+                        description: 'จัดอบรมเทคนิคการพยาบาลใหม่สำหรับบุคลากรพยาบาล',
+                        priority: 'low',
+                        status: 'pending',
+                        category: 'training',
+                        progress: 25,
+                        tags: ['อบรม', 'เทคนิค', 'บุคลากร'],
+                        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                        createdAt: new Date()
+                    },
+                    {
+                        id: 5,
+                        title: 'วิจัยเรื่องการดูแลผู้ป่วยเบาหวาน',
+                        patient: 'รศ.ดร.มาลี มีชัย',
+                        description: 'ส่งรายงานความคืบหน้าโครงการวิจัยประจำเดือน',
+                        priority: 'high',
+                        status: 'progress',
+                        category: 'research',
+                        progress: 50,
+                        tags: ['วิจัย', 'เบาหวาน', 'รายงาน'],
+                        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Next Week
+                        createdAt: new Date()
+                    }
+                ];
+            }
+            saveTasks();
+        }
+
+        function saveTasks() {
+            localStorage.setItem('nursingTasks', JSON.stringify(tasks));
+        }
+
+        // --- Task Filtering and Sorting ---
+
+        function getFilteredTasks(tasksToFilter = tasks) {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            let filtered = tasksToFilter.filter(task => {
+                const matchesSearch = searchQuery === '' || 
+                                      task.title.toLowerCase().includes(searchQuery) || 
+                                      task.patient.toLowerCase().includes(searchQuery) ||
+                                      (task.description && task.description.toLowerCase().includes(searchQuery)) ||
+                                      task.tags.some(tag => tag.toLowerCase().includes(searchQuery));
+                
+                const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
+                const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
+
+                return matchesSearch && matchesPriority && matchesStatus;
+            });
+
+            // Apply current sorting
+            return filtered.sort((a, b) => {
+                if (currentSort === 'dueDate') {
+                    return new Date(a.dueDate) - new Date(b.dueDate);
+                } else if (currentSort === 'priority') {
+                    const priorityOrder = { high: 3, medium: 2, low: 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority];
+                } else if (currentSort === 'progress') {
+                    return a.progress - b.progress;
+                }
+                return 0;
+            });
+        }
+
+        function handleSearch() {
+            updateAllDisplays();
+        }
+
+        function applyFilters() {
+            updateAllDisplays();
+        }
+
+        function sortTasks(sortType) {
+            currentSort = sortType;
+            updateAllDisplays();
+        }
+
+        // --- Task Handling (CRUD) ---
+
+        function handleTaskSubmission(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('taskTitle').value;
+            const patient = document.getElementById('patientName').value;
+            const description = document.getElementById('taskDescription').value;
+            const priority = document.getElementById('priority').value;
+            const category = document.getElementById('category').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const progress = parseInt(document.getElementById('progressSlider').value);
+            const tags = document.getElementById('taskTags').value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+
+            const newTask = {
+                id: nextTaskId++,
+                title,
+                patient,
+                description,
+                priority,
+                category,
+                progress,
+                tags,
+                dueDate: new Date(dueDate),
+                createdAt: new Date(),
+                status: progress === 100 ? 'completed' : (progress > 0 ? 'progress' : 'pending')
+            };
+
+            tasks.push(newTask);
+            saveTasks();
+            document.getElementById('taskForm').reset();
+            setDefaultDueDate();
+            document.getElementById('progressValue').textContent = '0%';
+            updateAllDisplays();
+        }
+
+        function handleQuickAdd(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('quickTaskTitle').value;
+            const patient = document.getElementById('quickPatientName').value;
+
+            const newTask = {
+                id: nextTaskId++,
+                title,
+                patient,
+                description: 'เพิ่มงานด่วน',
+                priority: 'medium',
+                category: 'general',
+                progress: 0,
+                tags: ['ด่วน'],
+                dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Default to tomorrow
+                createdAt: new Date(),
+                status: 'pending'
+            };
+
+            tasks.push(newTask);
+            saveTasks();
+            document.getElementById('quickAddForm').reset();
+            closeQuickAddModal();
+            updateAllDisplays();
+        }
+        
+        function changeTaskStatus(id, newStatus) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.status = newStatus;
+                if (newStatus === 'completed') {
+                    task.progress = 100;
+                } else if (newStatus === 'pending') {
+                    task.progress = 0;
+                } else if (newStatus === 'progress' && task.progress === 0) {
+                    task.progress = 1;
+                }
+                saveTasks();
+                updateAllDisplays();
+            }
+        }
+        
+        // --- ส่วนที่แก้ไข: เพิ่มฟังก์ชันลบงาน
+        function deleteTask(id) {
+            if (confirm('คุณต้องการลบงานนี้ใช่หรือไม่?')) {
+                tasks = tasks.filter(t => t.id !== id);
+                saveTasks();
+                updateAllDisplays();
+            }
+        }
+
+        // --- Rendering Functions ---
+
+        function createTaskCardHtml(task) {
+            const priorityClass = task.priority ? `priority-${task.priority}` : '';
+            const statusColor = task.status === 'completed' ? 'text-green-600' : (task.status === 'progress' ? 'text-blue-600' : 'text-yellow-600');
+            const statusText = task.status === 'completed' ? 'เสร็จสิ้น' : (task.status === 'progress' ? 'กำลังทำ' : 'รอดำเนินการ');
+            const statusIcon = task.status === 'completed' ? '✅' : (task.status === 'progress' ? '🔄' : '⏳');
+            const dueDateText = formatThaiDateTime(task.dueDate);
+            const isOverdue = task.status !== 'completed' && new Date() > new Date(task.dueDate);
+            const overdueClass = isOverdue ? 'text-red-500 font-bold' : 'text-blue-500';
+
+            const highlight = (text) => {
+                const query = document.getElementById('searchInput').value.toLowerCase();
+                if (!query) return text;
+                const regex = new RegExp(`(${query})`, 'gi');
+                return text.replace(regex, '<span class="search-highlight">$1</span>');
+            };
+            
+            return `
+                <div class="glass-effect p-4 rounded-xl shadow-lg card-hover transition-all duration-300 slide-in ${priorityClass} relative group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-bold text-lg text-blue-dark leading-tight">${highlight(task.title)}</h4>
+                        
+                        <div class="relative inline-block text-left">
+                            <button onclick="document.getElementById('dropdown-${task.id}').classList.toggle('hidden')" 
+                                    type="button" class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100 transition-all">
+                                •••
+                            </button>
+                            <div id="dropdown-${task.id}" class="dropdown-menu hidden origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none w-48 mt-1">
+                                <div class="py-1">
+                                    <a href="#" onclick="changeTaskStatus(${task.id}, 'pending'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">⏳ รอดำเนินการ</a>
+                                    <a href="#" onclick="changeTaskStatus(${task.id}, 'progress'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">🔄 กำลังทำ</a>
+                                    <a href="#" onclick="changeTaskStatus(${task.id}, 'completed'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">✅ เสร็จสิ้น</a>
+                                    <div class="border-t border-gray-100 my-1"></div>
+                                    <a href="#" onclick="editTask(${task.id}); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">✏️ แก้ไข</a>
+                                    <a href="#" onclick="duplicateTask(${task.id}); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">📄 ทำสำเนา</a>
+                                    <a href="#" onclick="deleteTask(${task.id}); return false;" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700">🗑️ ลบงาน</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-700 mb-1">ผู้ปฏิบัติงาน: <span class="font-medium text-blue-medium">${highlight(task.patient)}</span></p>
+                    <p class="text-xs ${overdueClass} mb-3">
+                        📅 กำหนด: ${dueDateText}
+                        ${isOverdue ? '<span class="ml-2 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">เกินกำหนด</span>' : ''}
+                    </p>
+
+                    <div class="flex justify-between items-center text-sm mb-2">
+                        <span class="${statusColor}">${statusIcon} ${statusText}</span>
+                        <span class="text-gray-600">${task.progress}%</span>
+                    </div>
+
+                    <div class="w-full bg-blue-100 rounded-full h-2">
+                        <div class="progress-bar h-2 rounded-full" style="width: ${task.progress}%"></div>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap gap-1">
+                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">${task.category}</span>
+                        ${task.tags.map(tag => `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">${highlight(tag)}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTaskList() {
+            const taskListElement = document.getElementById('taskList');
+            const filteredTasks = getFilteredTasks();
+            
+            taskListElement.innerHTML = filteredTasks.length > 0
+                ? filteredTasks.map(createTaskCardHtml).join('')
+                : '<p class="text-center text-gray-500 py-8">ไม่พบงานที่ตรงกับเงื่อนไข</p>';
+        }
+
+        function renderKanbanView() {
+            const pendingEl = document.getElementById('kanban-pending');
+            const progressEl = document.getElementById('kanban-progress');
+            const completedEl = document.getElementById('kanban-completed');
+            
+            // Filter without regard to view-specific filters, only search query and priority filter
+            const allTasks = getFilteredTasks(tasks); 
+            
+            const pendingTasks = allTasks.filter(t => t.status === 'pending');
+            const progressTasks = allTasks.filter(t => t.status === 'progress');
+            const completedTasks = allTasks.filter(t => t.status === 'completed');
+
+            pendingEl.innerHTML = pendingTasks.map(createTaskCardHtml).join('');
+            progressEl.innerHTML = progressTasks.map(createTaskCardHtml).join('');
+            completedEl.innerHTML = completedTasks.map(createTaskCardHtml).join('');
+
+            document.getElementById('kanban-pending-count').textContent = pendingTasks.length;
+            document.getElementById('kanban-progress-count').textContent = progressTasks.length;
+            document.getElementById('kanban-completed-count').textContent = completedTasks.length;
+        }
+
+        // --- Statistics and Chart ---
+
+        function updateStats() {
+            const total = tasks.length;
+            const pending = tasks.filter(t => t.status === 'pending').length;
+            const progress = tasks.filter(t => t.status === 'progress').length;
+            const completed = tasks.filter(t => t.status === 'completed').length;
+            
+            const efficiency = total > 0 ? ((completed / total) * 100).toFixed(0) : 0;
+            const overallProgressValue = total > 0 ? (tasks.reduce((sum, t) => sum + t.progress, 0) / total).toFixed(0) : 0;
+
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('pendingTasks').textContent = pending;
+            document.getElementById('progressTasks').textContent = progress;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('efficiency').textContent = `${efficiency}%`;
+
+            // Overall Progress Bar
+            document.getElementById('overallProgress').textContent = `${overallProgressValue}%`;
+            document.getElementById('overallProgressBar').style.width = `${overallProgressValue}%`;
+
+            // Quick Actions Counters
+            const now = new Date();
+            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 7);
+            const isToday = (date) => new Date(date).toDateString() === new Date().toDateString();
+
+            document.getElementById('urgentCount').textContent = tasks.filter(t => t.priority === 'high' && t.status !== 'completed').length;
+            document.getElementById('overdueCount').textContent = tasks.filter(t => t.status !== 'completed' && new Date(t.dueDate) < now).length;
+            document.getElementById('todayCount').textContent = tasks.filter(t => t.status !== 'completed' && isToday(t.dueDate)).length;
+            document.getElementById('completedTasksCount').textContent = completed;
+            document.getElementById('weekTasksCount').textContent = tasks.filter(t => 
+                new Date(t.dueDate) >= startOfWeek && new Date(t.dueDate) < endOfWeek
+            ).length;
+            // document.getElementById('completedToDeleteCount').textContent = completed; // Removed by user request
+            
+            updateChartData(pending, progress, completed);
+            updateCategoryProgress();
+        }
+        
+        function updateCategoryProgress() {
+            const categories = tasks.map(t => t.category).filter((value, index, self) => self.indexOf(value) === index);
+            const categoryProgressEl = document.getElementById('categoryProgress');
+            categoryProgressEl.innerHTML = '';
+            
+            categories.forEach(cat => {
+                const catTasks = tasks.filter(t => t.category === cat);
+                const totalProgress = catTasks.reduce((sum, t) => sum + t.progress, 0);
+                const avgProgress = catTasks.length > 0 ? (totalProgress / catTasks.length).toFixed(0) : 0;
+                
+                const html = `
+                    <div>
+                        <div class="flex justify-between text-xs text-blue-600 mb-1">
+                            <span>${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+                            <span>${avgProgress}%</span>
+                        </div>
+                        <div class="w-full bg-blue-100 rounded-full h-1.5">
+                            <div class="progress-bar h-1.5 rounded-full" style="width: ${avgProgress}%"></div>
+                        </div>
+                    </div>
+                `;
+                categoryProgressEl.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function initializeChart() {
+            const ctx = document.getElementById('taskChart').getContext('2d');
+            taskChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['เสร็จสิ้น', 'กำลังทำ', 'รอดำเนินการ'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: isDarkMode ? 'white' : 'black'
+                            }
+                        },
+                        title: {
+                            display: false,
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChartData(pending, progress, completed) {
+            if (taskChart) {
+                taskChart.data.datasets[0].data = [completed, progress, pending];
+                taskChart.update();
+            }
+        }
+        
+        // Placeholder for Edit/Duplicate
+        function editTask(id) {
+            alert(`กำลังแก้ไขงาน ID: ${id}. (ต้องใช้ modal/form แยกต่างหากสำหรับฟังก์ชันนี้)`);
+        }
+        function duplicateTask(id) {
+            alert(`กำลังทำสำเนางาน ID: ${id}.`);
+        }
+        
+        // Placeholder Quick Action Filters (clears all filters and sets specific view)
+        function showUrgentTasks() { clearFilters(); document.getElementById('priorityFilter').value = 'high'; updateAllDisplays(); }
+        function showOverdueTasks() { clearFilters(); alert('ฟังก์ชันแสดงงานเกินกำหนดจะกรองเฉพาะงานที่สถานะไม่สมบูรณ์และเกินกำหนดเวลา'); updateAllDisplays(); } // Logic handled in updateStats, but full filter needs implementation
+        function showTodayTasks() { clearFilters(); alert('ฟังก์ชันแสดงงานวันนี้จะกรองเฉพาะงานที่กำหนดส่งภายในวันนี้'); updateAllDisplays(); } // Logic needs full implementation
+        function showCompletedTasks() { clearFilters(); document.getElementById('statusFilter').value = 'completed'; updateAllDisplays(); }
+        function showThisWeekTasks() { clearFilters(); alert('ฟังก์ชันแสดงงานสัปดาห์นี้จะกรองเฉพาะงานที่กำหนดส่งภายในสัปดาห์นี้'); updateAllDisplays(); } // Logic needs full implementation
+
+        // --- View Control ---
+
+        function updateAllDisplays() {
+            updateStats();
+            renderTaskList();
+            renderKanbanView();
+            // Close all dropdowns when displays update
+            document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
+        }
+
+        function openQuickAddModal() {
+            document.getElementById('quickAddModal').classList.remove('hidden');
+        }
+
+        function closeQuickAddModal() {
+            document.getElementById('quickAddModal').classList.add('hidden');
+        }
+
+        // --- Initialization ---
+
+        function initializeApp() {
+            loadSampleTasks();
+            initializeChart();
+            updateAllDisplays();
+            setDefaultDueDate();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('taskForm').addEventListener('submit', handleTaskSubmission);
+            document.getElementById('quickAddForm').addEventListener('submit', handleQuickAdd);
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+            document.getElementById('priorityFilter').addEventListener('change', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('progressSlider').addEventListener('input', updateProgressValue);
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.relative.inline-block')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
+                }
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            updateClock();
+            setInterval(updateClock, 1000);
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>
