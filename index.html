@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบติดตามงานบุคลากรการศึกษาพยาบาล v5.0</title>
+    <title>ระบบติดตามงานบุคลากร</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -547,7 +547,7 @@
         function toggleView() {
             currentView = currentView === 'list' ? 'Task List' : 'list';
             document.getElementById('listView').classList.toggle('hidden', currentView !== 'list');
-            document.getElementById('kanbanView').classList.toggle('hidden', currentView !== 'Task List');
+            document.getElementById('TaskView').classList.toggle('hidden', currentView !== 'Task List');
             document.getElementById('viewText').textContent = currentView === 'list' ? 'Task List' : 'List';
             document.getElementById('viewIcon').textContent = currentView === 'list' ? '📋' : '🧱';
         }
