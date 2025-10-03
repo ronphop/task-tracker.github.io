@@ -164,7 +164,7 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-blue-dark">ระบบติดตามงานบุคลากรการศึกษาพยาบาล</h1>
-                        <p class="text-blue-600 text-sm"> Nursing Education Task Management</p>
+                        <p class="text-blue-600 text-sm">เวอร์ชั่น 5.0 - Nursing Education Task Management</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -816,7 +816,7 @@
                 return text.replace(regex, '<span class="search-highlight">$1</span>');
             };
             
-            return 
+            return `
                 <div class="glass-effect p-4 rounded-xl shadow-lg card-hover transition-all duration-300 slide-in ${priorityClass} relative group">
                     <div class="flex justify-between items-start mb-2">
                         <h4 class="font-bold text-lg text-blue-dark leading-tight">${highlight(task.title)}</h4>
