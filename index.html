@@ -548,7 +548,7 @@
             currentView = currentView === 'list' ? 'kanban' : 'list';
             document.getElementById('listView').classList.toggle('hidden', currentView !== 'list');
             document.getElementById('kanbanView').classList.toggle('hidden', currentView !== 'kanban');
-            document.getElementById('viewText').textContent = currentView === 'list' ? 'Kanban' : 'List';
+            document.getElementById('viewText').textContent = currentView === 'list' ? 'Home' : 'List';
             document.getElementById('viewIcon').textContent = currentView === 'list' ? '📋' : '🧱';
         }
 
