@@ -545,9 +545,9 @@
         }
 
         function toggleView() {
-            currentView = currentView === 'list' ? 'kanban' : 'list';
+            currentView = currentView === 'list' ? 'Task List' : 'list';
             document.getElementById('listView').classList.toggle('hidden', currentView !== 'list');
-            document.getElementById('kanbanView').classList.toggle('hidden', currentView !== 'kanban');
+            document.getElementById('kanbanView').classList.toggle('hidden', currentView !== 'Task List');
             document.getElementById('viewText').textContent = currentView === 'list' ? 'Task List' : 'List';
             document.getElementById('viewIcon').textContent = currentView === 'list' ? '📋' : '🧱';
         }
