@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบติดตามงานบุคลากรการศึกษาพยาบาล v5.0</title>
+    <title>ระบบติดตามงานบุคลากรการศึกษาพยาบาล </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -800,67 +800,67 @@
 
         // --- Rendering Functions ---
 
-        function createTaskCardHtml(task) {
-            const priorityClass = task.priority ? `priority-${task.priority}` : '';
-            const statusColor = task.status === 'completed' ? 'text-green-600' : (task.status === 'progress' ? 'text-blue-600' : 'text-yellow-600');
-            const statusText = task.status === 'completed' ? 'เสร็จสิ้น' : (task.status === 'progress' ? 'กำลังทำ' : 'รอดำเนินการ');
-            const statusIcon = task.status === 'completed' ? '✅' : (task.status === 'progress' ? '🔄' : '⏳');
-            const dueDateText = formatThaiDateTime(task.dueDate);
-            const isOverdue = task.status !== 'completed' && new Date() > new Date(task.dueDate);
-            const overdueClass = isOverdue ? 'text-red-500 font-bold' : 'text-blue-500';
+       function createTaskCardHtml(task) {
+            const priorityClass = task.priority ? `priority-${task.priority}` : '';
+            const statusColor = task.status === 'completed' ? 'text-green-600' : (task.status === 'progress' ? 'text-blue-600' : 'text-yellow-600');
+            const statusText = task.status === 'completed' ? 'เสร็จสิ้น' : (task.status === 'progress' ? 'กำลังทำ' : 'รอดำเนินการ');
+            const statusIcon = task.status === 'completed' ? '✅' : (task.status === 'progress' ? '🔄' : '⏳');
+            const dueDateText = formatThaiDateTime(task.dueDate);
+            const isOverdue = task.status !== 'completed' && new Date() > new Date(task.dueDate);
+            const overdueClass = isOverdue ? 'text-red-500 font-bold' : 'text-blue-500';
 
-            const highlight = (text) => {
-                const query = document.getElementById('searchInput').value.toLowerCase();
-                if (!query) return text;
-                const regex = new RegExp(`(${query})`, 'gi');
-                return text.replace(regex, '<span class="search-highlight">$1</span>');
-            };
-            
-            return `
-                <div class="glass-effect p-4 rounded-xl shadow-lg card-hover transition-all duration-300 slide-in ${priorityClass} relative group">
-                    <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-bold text-lg text-blue-dark leading-tight">${highlight(task.title)}</h4>
-                        
-                        <div class="relative inline-block text-left">
-                            <button onclick="document.getElementById('dropdown-${task.id}').classList.toggle('hidden')" 
-                                    type="button" class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100 transition-all">
-                                •••
-                            </button>
-                            <div id="dropdown-${task.id}" class="dropdown-menu hidden origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none w-48 mt-1">
-                                <div class="py-1">
-                                    <a href="#" onclick="changeTaskStatus(${task.id}, 'pending'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">⏳ รอดำเนินการ</a>
-                                    <a href="#" onclick="changeTaskStatus(${task.id}, 'progress'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">🔄 กำลังทำ</a>
-                                    <a href="#" onclick="changeTaskStatus(${task.id}, 'completed'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">✅ เสร็จสิ้น</a>
-                                    <a href="#" onclick="editTask(${task.id}); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">✏️ แก้ไข</a>
-                                    <a href="#" onclick="duplicateTask(${task.id}); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">📄 ทำสำเนา</a>
-                                    <a href="#" onclick="deleteTask(${task.id}); return false;" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700">🗑️ ลบงาน</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            const highlight = (text) => {
+                const query = document.getElementById('searchInput').value.toLowerCase();
+                if (!query) return text;
+                const regex = new RegExp(`(${query})`, 'gi');
+                return text.replace(regex, '<span class="search-highlight">$1</span>');
+            };
+            
+            return `
+                <div class="glass-effect p-4 rounded-xl shadow-lg card-hover transition-all duration-300 slide-in ${priorityClass} relative group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-bold text-lg text-blue-dark leading-tight">${highlight(task.title)}</h4>
+                        
+                        <div class="relative inline-block text-left">
+                            <button onclick="document.getElementById('dropdown-${task.id}').classList.toggle('hidden')" 
+                                    type="button" class="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100 transition-all">
+                                •••
+                            </button>
+                            <div id="dropdown-${task.id}" class="dropdown-menu hidden origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none w-48 mt-1 **z-50**">
+                                <div class="py-1">
+                                    <a href="#" onclick="changeTaskStatus(${task.id}, 'pending'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">⏳ รอดำเนินการ</a>
+                                    <a href="#" onclick="changeTaskStatus(${task.id}, 'progress'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">🔄 กำลังทำ</a>
+                                    <a href="#" onclick="changeTaskStatus(${task.id}, 'completed'); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">✅ เสร็จสิ้น</a>
+                                    <a href="#" onclick="editTask(${task.id}); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">✏️ แก้ไข</a>
+                                    <a href="#" onclick="duplicateTask(${task.id}); return false;" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700">📄 ทำสำเนา</a>
+                                    <a href="#" onclick="deleteTask(${task.id}); return false;" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700">🗑️ ลบงาน</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                    <p class="text-sm text-gray-700 mb-1">ผู้ปฏิบัติงาน: <span class="font-medium text-blue-medium">${highlight(task.patient)}</span></p>
-                    <p class="text-xs ${overdueClass} mb-3">
-                        📅 กำหนด: ${dueDateText}
-                        ${isOverdue ? '<span class="ml-2 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">เกินกำหนด</span>' : ''}
-                    </p>
+                    <p class="text-sm text-gray-700 mb-1">ผู้ปฏิบัติงาน: <span class="font-medium text-blue-medium">${highlight(task.patient)}</span></p>
+                    <p class="text-xs ${overdueClass} mb-3">
+                        📅 กำหนด: ${dueDateText}
+                        ${isOverdue ? '<span class="ml-2 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">เกินกำหนด</span>' : ''}
+                    </p>
 
-                    <div class="flex justify-between items-center text-sm mb-2">
-                        <span class="${statusColor}">${statusIcon} ${statusText}</span>
-                        <span class="text-gray-600">${task.progress}%</span>
-                    </div>
+                    <div class="flex justify-between items-center text-sm mb-2">
+                        <span class="${statusColor}">${statusIcon} ${statusText}</span>
+                        <span class="text-gray-600">${task.progress}%</span>
+                    </div>
 
-                    <div class="w-full bg-blue-100 rounded-full h-2">
-                        <div class="progress-bar h-2 rounded-full" style="width: ${task.progress}%"></div>
-                    </div>
+                    <div class="w-full bg-blue-100 rounded-full h-2">
+                        <div class="progress-bar h-2 rounded-full" style="width: ${task.progress}%"></div>
+                    </div>
 
-                    <div class="mt-3 flex flex-wrap gap-1">
-                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">${task.category}</span>
-                        ${task.tags.map(tag => `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">${highlight(tag)}</span>`).join('')}
-                    </div>
-                </div>
-            `;
-        }
+                    <div class="mt-3 flex flex-wrap gap-1">
+                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">${task.category}</span>
+                        ${task.tags.map(tag => `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">${highlight(tag)}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
 
         function renderTaskList() {
             const taskListElement = document.getElementById('taskList');
